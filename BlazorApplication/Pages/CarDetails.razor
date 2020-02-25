@@ -1,0 +1,121 @@
+﻿@page "/cars/carsdetails/{CarID:int}"
+@page "/cars/carsdetails"
+@inject ICarService carservice;
+@inject NavigationManager nv;
+@using BlazorApplication.Data
+
+<div id="details-left">
+    <EditForm Model="@CarDetail" class="inputs" OnValidSubmit="HandleValidSubmit">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+        <p>
+            <label>
+                Name<br />
+                <InputText class="inputs" @bind-Value="@CarDetail.Name" />
+            </label>
+        </p>
+        <p>
+            <label>
+                Price<br />
+                <InputNumber class="inputs" @bind-Value="@CarDetail.Price" />
+            </label>
+        </p>
+        <p>
+            <label>
+                Models<br />
+                <InputText class="inputs" @bind-Value="@CarDetail.Model" />
+            </label>
+        </p>
+        <p>
+            <label>
+                Type of Fuel<br />
+                            <InputSelect class="custom-select" @bind-Value="@CarDetail.TypeOfFuel">
+                                <option>Select...</option>
+                                <option value="@(CarDetail.TypeOfFuel)">LPG</option>
+                                <option value="@(CarDetail.TypeOfFuel)">Diesel</option>
+                                <option value="@(CarDetail.TypeOfFuel)">Petrol+Lpg</option>
+                            </InputSelect>
+            </label>
+        </p>
+        <p>
+            <label>
+                State<br />
+                <InputSelect class="custom-select" @bind-Value="@CarDetail.State">
+                    <option>Select...</option>
+                    <option value="@(CarDetail.State)">New</option>
+                    <option value="@(CarDetail.State)">Usage</option>
+                </InputSelect>
+            </label>
+        </p>
+        <p>
+            <label>
+                Production Date:<br />
+                <InputDate class="inputs" @bind-Value="@CarDetail.YearOfProduction" />
+            </label>
+
+        </p>
+
+        <p>
+            <label>
+                Millage<br />
+                <InputNumber class="inputs" @bind-Value="@CarDetail.Mileage" />
+            </label>
+        </p>
+        <input type="button" class="btn btn-primary" value="SAVE" @onclick="@Save">
+    </EditForm>
+</div>
+
+<div id="details-right">
+    <table>
+        <tbody>
+
+            <tr>@CarDetail.Name</tr>
+            <tr>@CarDetail.YearOfProduction</tr>
+            <tr>@CarDetail.Price</tr>
+            <tr>@CarDetail.Model</tr>
+            <tr>@CarDetail.TypeOfFuel</tr>
+            <tr>@CarDetail.State</tr>
+            <tr>@CarDetail.Mileage</tr>
+        </tbody>
+    </table>
+</div>
+
+
+<input type="button" @onclick="@Back" class="btn btn-secondary" value="BACK TO LAST PAGE" style="text-align:center"></input>
+@code {
+    [Parameter]
+    public int CarId { get; set; }
+    public Car CarDetail { get; set; }
+    Random rand = new Random();
+
+    protected override void OnInitialized()
+    {
+        CarDetail = carservice.GetCarById(CarId);
+    }
+
+    void Back()
+    {
+        nv.NavigateTo("/cars");
+    }
+    private void HandleValidSubmit()
+    {
+        Console.WriteLine("OnValidSubmit");
+    }
+    private void Save()
+    {
+        CarDetail.Id = rand.Next(15,123212132);
+        carservice.Update(CarDetail);
+        nv.NavigateTo("/cars");
+    }
+
+}
+@*<p>
+        <label> //// SELECTBOX
+            Primary Classification:<br />
+            <InputSelect class="inputs" @bind-Value="@CarDetail.State">
+                <option value="@EnumKind.Diesel">Diesel</option>
+                <option value="@EnumKind.Petrol">Petrol</option>
+                <option value="@EnumKind.Petrol_LPG.">Petrol+LPG</option>
+            </InputSelect>
+        </label>
+    </p>*@

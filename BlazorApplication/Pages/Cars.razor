@@ -1,0 +1,132 @@
+﻿@page "/cars"
+@inject ICarService carservice;
+@inject HttpClient http;
+@using BlazorApplication.Data
+@inject NavigationManager NagationManager;
+
+
+<h2>ADD NEW CAR TO OUR LIST OF CAR</h2>
+<div class="col-12" id="AddCar">
+
+    <EditForm Model="@car" OnValidSubmit="@SaveCar">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+
+        <div class="col-12 row">
+            <label class="col-2 font-weight-bold">Name :</label>
+            <input class="form-control col-3" @bind="@car.Name" placeholder="Name" />
+            &nbsp;<ValidationMessage For="@(() => car.Name)" />
+        </div>
+        <br />
+        <div class="col-12 row">
+            <label class="col-2 font-weight-bold">Price</label>
+            <input class="form-control col-3" @bind="@car.Price" placeholder="Name" />
+            &nbsp;<ValidationMessage For="@(() => car.Price)" />
+        </div>
+        <br />
+        <div class="col-12 row">
+            <label class="col-2 font-weight-bold">Model</label>
+            <input class="form-control col-3" @bind="@car.Model" placeholder="Model" />
+            &nbsp;<ValidationMessage For="@(() => car.Model)" />
+        </div>
+        <br />
+        <div class="col-12 row">
+            <label class="col-2 font-weight-bold">Type of Fuel</label>
+            <input class="form-control col-3" @bind="@car.TypeOfFuel" placeholder="TypeOfFuel" />
+            &nbsp;<ValidationMessage For="@(() => car.TypeOfFuel)" />
+        </div>
+        <br />
+        <div class="col-12 row">
+            <label class="col-2 font-weight-bold">State</label>
+            <input class="form-control col-3" @bind="@car.State" placeholder="State" />
+            &nbsp;<ValidationMessage For="@(() => car.State)" />
+        </div>
+        <br />
+        <div class="col-12 row">
+            <label class="col-2 font-weight-bold">YearOfProduction</label>
+            <InputDate class="form-control col-3" @bind-Value="@car.YearOfProduction" />
+            &nbsp;<ValidationMessage For="@(() => car.YearOfProduction)" />
+        </div>
+        <br />
+        <div class="col-12 row">
+            <label class="col-2 font-weight-bold">Mileage</label>
+            <input class="form-control col-3" @bind="@car.Mileage" placeholder="Mileage" />
+            &nbsp;<ValidationMessage For="@(() => car.Mileage)" />
+        </div>
+        <br />
+        <input type="submit" class="btn btn-primary" value="Add new Car">
+
+    </EditForm>
+
+</div>
+            <h3>Cars</h3>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th scope="col">ID</th>
+                        <th scope="col">Name</th>
+                        <th scope="col">Price</th>
+                        <th scope="col">model</th>
+                        <th scope="col">TypeOfFuel</th>
+                        <th scope="col">State</th>
+                        <th scope="col">YearOfProduction</th>
+                        <th scope="col">Mileage</th>
+                        <th scope="col">DELETE</th>
+                    </tr>
+                </thead>
+                <tr>
+                </tr>
+                <tbody>
+                    @foreach (var cars in Carlist)
+                    {
+                    <tr>
+
+                        <td>
+                            <NavLink href="@string.Format("/cars/carsdetails/{0}",cars.Id)">
+                                @cars.Id
+                            </NavLink>
+                        </td>
+                        <td>@cars.Name</td>
+                        <td>@cars.Price.ToString("C:2")</td>
+                        <td>@cars.Model</td>
+                        <td>@cars.TypeOfFuel</td>
+                        <td>@cars.State</td>
+                        <td>@cars.YearOfProduction</td>
+                        <td>@cars.Mileage</td>
+                        <td>
+                        <input type="button" class="btn btn-primary"  @bind-value="@cars.Id" @onclick="(() => DeleteCar(cars))"  >
+                        </td>
+                    </tr>
+                    }
+                </tbody>
+            </table>
+            <input type="button" @onclick="@back" class="btn btn-primary btn-lg btn-block" value="BACK TO LAST PAGE" style="text-align:center"></input>
+            @code {
+                public List<Car> Carlist { get; set; }
+                public Car car { get; set; }
+                [Parameter]
+                public int CarId { get; set; }
+
+                protected override void OnInitialized()
+                {
+                    car = new Car();
+                    Carlist = carservice.GetCar();
+                }
+                public void back()
+                {
+                    NagationManager.NavigateTo("");
+                }
+                private void SaveCar()
+                {
+                    carservice.Save(car);
+                    car = new Car();
+                }
+
+                private void DeleteCar(Car car)
+                {
+
+                    carservice.Delete(car);
+                }
+
+            }
