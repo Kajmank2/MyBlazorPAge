@@ -16,6 +16,7 @@ using Microsoft.Extensions.Hosting;
 using BlazorApplication.Areas.Identity;
 using BlazorApplication.Data;
 using System.Net.Http;
+using Microsoft.JSInterop;
 
 namespace BlazorApplication
 {
@@ -43,6 +44,7 @@ namespace BlazorApplication
             services.AddSingleton<WeatherForecastService>();
             services.AddSingleton<ICarService, CarService>();
             services.AddSingleton<HttpClient>();
+            services.AddSingleton<ICustomerService, CustomerService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

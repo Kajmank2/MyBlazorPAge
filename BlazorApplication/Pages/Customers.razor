@@ -1,0 +1,99 @@
+﻿@page "/customers"
+@inject HttpClient http;
+@inject ICustomerService  cuservice;
+@using BlazorApplication.Data
+@inject NavigationManager NavigationManager;
+
+<h2>ADD NEW CAR TO OUR LIST OF CAR</h2>
+<EditForm Model="@customer" OnValidSubmit="SaveCustomer">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+    <div class="col-12">
+        <div class="col-12 row">
+            <label class="col-2 font-weight-bold" placeholder="Name">Name</label>
+            <InputText class="form-control col-3" @bind-Value="@customer.Name" />
+        </div>
+        <div class="col-12 row">
+            <label class="col-2 font-weight-bold" placeholder="Name">Second Name</label>
+            <InputText class="form-control col-3" @bind-Value="@customer.SecondName" />
+        </div>
+        <div class="col-12 row">
+            <label class="col-2 font-weight-bold" placeholder="Name">Email</label>
+            <InputText class="form-control col-3" @bind-Value="@customer.Email" />
+        </div>
+        <div class="col-12 row">
+            <label class="col-2 font-weight-bold" placeholder="Name">BirthDay</label>
+            <InputDate class="form-control col-3" @bind-Value="@customer.Birthday" />
+        </div>
+        <button type="submit">Submit</button>
+    </div>
+</EditForm>
+
+<hr />
+
+<h3></h3>
+<table class="table">
+    <thead>
+        <tr>
+            <th scope="col">ID</th>
+            <th scope="col">Name</th>
+            <th scope="col">Second Name</th>
+            <th scope="col">Email</th>
+            <th scope="col">BirthDay</th>
+        </tr>
+    </thead>
+    <tr>
+    </tr>
+    <tbody>
+        @foreach (var customer in CustomerList)
+        {
+            <tr>
+
+                <td>
+                    <NavLink href="@string.Format("/customer/customerDetails/{0}",customer.Id)">
+                        @customer.Id
+                    </NavLink>
+                </td>
+                <td>@customer.Name</td>
+                <td>@customer.SecondName</td>
+                <td>@customer.Email</td>
+                <td>@customer.Birthday.ToString("dddd, dd MMMM yyyy")</td>
+                <td>
+                    <input type="button" class="btn btn-primary" @bind-value="@customer.Id" @onclick="(() => DeleteCustomer())">
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+
+
+@code {
+
+    public List<Customer> CustomerList { get; set; }
+    public Customer customer { get; set; }
+
+    protected override void OnInitialized()
+    {
+        customer = new Customer();
+        CustomerList = cuservice.AllCustomers();
+    }
+
+    private void HandleValidSubmit()
+    {
+        Console.WriteLine("OnValidSubmit");
+    }
+    private void SaveCustomer()
+    {
+        cuservice.Save(customer);   
+        customer = new Customer();
+
+
+    }
+    private void DeleteCustomer()
+    {
+        cuservice.Delete(customer);
+    }
+
+}
+

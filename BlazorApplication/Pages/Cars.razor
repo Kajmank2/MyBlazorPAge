@@ -1,6 +1,7 @@
 ﻿@page "/cars"
 @inject ICarService carservice;
 @inject HttpClient http;
+@inject IJSRuntime JSRunTime;
 @using BlazorApplication.Data
 @inject NavigationManager NagationManager;
 
@@ -8,14 +9,19 @@
 <h2>ADD NEW CAR TO OUR LIST OF CAR</h2>
 <div class="col-12" id="AddCar">
 
+    <hr />
+@*VISIBLE VALIDATOR*@
+    @*<ServerValidation IsVisible="IsVisible" Results="Results">
+        <span>Author: </span>@RecordName
+    </ServerValidation>*@
+@*<div id="divServerValidations" class="col-10 alert alert-info">
+</div>*@
     <EditForm Model="@car" OnValidSubmit="@SaveCar">
-        <DataAnnotationsValidator />
-        <ValidationSummary />
-
-
+        @*<DataAnnotationsValidator />*@
+        @*<ValidationSummary />*@
         <div class="col-12 row">
             <label class="col-2 font-weight-bold">Name :</label>
-            <input class="form-control col-3" @bind="@car.Name" placeholder="Name" />
+            <input @ref="nameText" class="form-control col-3" @bind="@car.Name" placeholder="Name" />
             &nbsp;<ValidationMessage For="@(() => car.Name)" />
         </div>
         <br />
@@ -33,12 +39,22 @@
         <br />
         <div class="col-12 row">
             <label class="col-2 font-weight-bold">Type of Fuel</label>
-            <input class="form-control col-3" @bind="@car.TypeOfFuel" placeholder="TypeOfFuel" />
-            &nbsp;<ValidationMessage For="@(() => car.TypeOfFuel)" />
+            <InputSelect @bind-Value="car.TypeOfFuel" class="form-control col-3">
+                @if (Kind != null)
+                {
+                    foreach (var item in Kind)
+                    {
+                        <option value="@item">@item</option>
+                    }
+                }
+            </InputSelect>
+            @*<input class="form-control col-3" @bind="@car.TypeOfFuel" placeholder="TypeOfFuel" />
+                &nbsp;<ValidationMessage For="@(() => car.TypeOfFuel)" />*@
         </div>
         <br />
         <div class="col-12 row">
             <label class="col-2 font-weight-bold">State</label>
+
             <input class="form-control col-3" @bind="@car.State" placeholder="State" />
             &nbsp;<ValidationMessage For="@(() => car.State)" />
         </div>
@@ -105,9 +121,23 @@
             @code {
                 public List<Car> Carlist { get; set; }
                 public Car car { get; set; }
+                public string[] Kind { get; set; }
+                ElementReference nameText;
                 [Parameter]
                 public int CarId { get; set; }
 
+                public bool IsVisible { get; set; }
+                public string RecordName { get; set; }
+                public bool Results { get; set; }
+
+                protected override async Task OnAfterRenderAsync(bool firstRender)
+                {
+                    if (firstRender && Kind == null)
+                    {
+                        Kind = await JSRunTime.InvokeAsync<string[]>("getKind");
+                        StateHasChanged();
+                    }
+                }
                 protected override void OnInitialized()
                 {
                     car = new Car();
@@ -117,10 +147,18 @@
                 {
                     NagationManager.NavigateTo("");
                 }
-                private void SaveCar()
+                private async Task SaveCar()
                 {
-                    carservice.Save(car);
+                    Results = false; 
+                    IsVisible = true;
                     car = new Car();
+                    var Name = car.Name;
+                    var Model = car.Model;
+                    RecordName = Name +" "+ Model;
+                    //Valid JS 
+                    // await  JSRunTime.InvokeVoidAsync("saveMessage",Name,Model);
+                    await JSRunTime.InvokeVoidAsync("setFocusOnElemt", nameText);
+                      carservice.Save(car);
                 }
 
                 private void DeleteCar(Car car)
@@ -129,4 +167,29 @@
                     carservice.Delete(car);
                 }
 
-            }
+
+
+
+
+
+
+                protected override void OnParametersSet()
+                {
+                    Console.WriteLine("Authors - OnParametersSet");
+                    base.OnParametersSet();
+                }
+
+                protected override async Task OnParametersSetAsync()
+                {
+                    Console.WriteLine("Authors - OnParametersSetAsync");
+                    await base.OnParametersSetAsync();
+                }
+
+                protected override void OnAfterRender(bool firstRender)
+                {
+                    Console.WriteLine("Authors - OnAfterRender - firstRender = " + firstRender);
+                    base.OnAfterRender(firstRender);
+                }
+
+
+}
